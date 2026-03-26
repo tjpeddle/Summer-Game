@@ -5,794 +5,227 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HPU Whodunit — Campus Mystery</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 :root {
-  --ink: #0c0b09;
-  --parchment: #f2ead8;
-  --aged: #ddd0b0;
-  --sepia: #b8956a;
-  --rust: #8b3a1a;
-  --gold: #c9922a;
-  --gold-light: #e8b84b;
-  --gold-dim: rgba(201,146,42,0.25);
-  --crimson: #7a1c2e;
-  --forest: #1a3d2b;
-  --slate: #1e2128;
-  --fog: #5a5f6b;
-  --mist: #8a909d;
-  --paper: #faf7f0;
+  --ink:#0c0b09;--parchment:#f2ead8;--aged:#ddd0b0;--sepia:#b8956a;
+  --rust:#8b3a1a;--gold:#c9922a;--gold-light:#e8b84b;--gold-dim:rgba(201,146,42,0.22);
+  --crimson:#7a1c2e;--forest:#1a3d2b;--slate:#1e2128;
+  --fog:#5a5f6b;--mist:#8a909d;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{
-  background:var(--ink);
-  color:var(--parchment);
-  font-family:'Crimson Pro',Georgia,serif;
-  min-height:100vh;
-  overflow-x:hidden;
-  cursor:default;
-}
-
-/* ── SCREENS ── */
+body{background:var(--ink);color:var(--parchment);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;overflow-x:hidden;}
 .screen{display:none;}
 .screen.active{display:block;}
-#splash.active{display:flex;}
-#avatar-screen.active{display:flex;}
+#splash.active,#avatar-screen.active{display:flex;}
 
 /* ── SPLASH ── */
-#splash{
-  min-height:100vh;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:2rem;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, #1c1408 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 20% 100%, #0a1a0f 0%, transparent 50%),
-    var(--ink);
-  position:relative;
-  overflow:hidden;
-}
-#splash::before{
-  content:'';
-  position:absolute;inset:0;
-  background-image:
-    radial-gradient(circle at 20% 20%, rgba(201,146,42,0.04) 0%, transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(201,146,42,0.03) 0%, transparent 40%);
-  pointer-events:none;
-}
-.splash-ornament{
-  font-size:3.5rem;
-  margin-bottom:1.5rem;
-  display:block;
-  animation:flicker 3s ease-in-out infinite;
-  filter:drop-shadow(0 0 20px rgba(201,146,42,0.5));
-}
-@keyframes flicker{
-  0%,100%{transform:scale(1) rotate(-0.5deg);opacity:1;}
-  33%{transform:scale(1.03) rotate(0.5deg);opacity:0.9;}
-  66%{transform:scale(0.98) rotate(-0.3deg);opacity:0.95;}
-}
-.game-title{
-  font-family:'Playfair Display',serif;
-  font-size:clamp(3rem,10vw,6rem);
-  font-weight:900;
-  color:var(--gold-light);
-  letter-spacing:-0.02em;
-  line-height:0.9;
-  text-shadow:0 0 80px rgba(232,184,75,0.2);
-}
-.game-title em{
-  display:block;
-  font-style:italic;
-  font-weight:700;
-  font-size:0.55em;
-  color:var(--sepia);
-  letter-spacing:0.05em;
-  margin-bottom:0.2em;
-}
-.game-tagline{
-  font-family:'Space Mono',monospace;
-  font-size:0.62rem;
-  letter-spacing:0.35em;
-  color:var(--sepia);
-  text-transform:uppercase;
-  margin:1rem 0 0.5rem;
-}
-.game-mystery{
-  font-style:italic;
-  font-size:1.15rem;
-  color:var(--mist);
-  max-width:480px;
-  line-height:1.7;
-  margin:0.5rem auto 2.5rem;
-}
-.hr-ornament{
-  display:flex;align-items:center;gap:1rem;
-  max-width:320px;margin:0 auto 2rem;color:var(--sepia);font-size:0.8rem;
-}
-.hr-ornament::before,.hr-ornament::after{
-  content:'';flex:1;height:1px;
-  background:linear-gradient(90deg,transparent,var(--sepia),transparent);
-}
+#splash{min-height:100vh;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;
+  background:radial-gradient(ellipse 90% 70% at 50% 0%,#2d1b4e 0%,#1a0f30 40%,#0e0820 70%,#080612 100%);}
+#splash::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 50% at 30% 60%,rgba(120,60,200,0.12) 0%,transparent 60%),
+             radial-gradient(ellipse 40% 40% at 75% 30%,rgba(180,120,255,0.08) 0%,transparent 55%);}
+.splash-ornament{font-size:3.5rem;margin-bottom:1.5rem;animation:flicker 3s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(180,120,255,0.6));}
+@keyframes flicker{0%,100%{transform:scale(1) rotate(-0.5deg);opacity:1;}33%{transform:scale(1.03) rotate(0.5deg);opacity:0.9;}66%{transform:scale(0.98) rotate(-0.3deg);opacity:0.95;}}
+.game-title{font-family:'Playfair Display',serif;font-size:clamp(3rem,10vw,6rem);font-weight:900;color:#e8d5ff;letter-spacing:-0.02em;line-height:0.9;text-shadow:0 0 80px rgba(160,80,255,0.35);}
+.game-title em{display:block;font-style:italic;font-weight:700;font-size:0.55em;color:#a87fd4;letter-spacing:0.05em;margin-bottom:0.2em;}
+.game-tagline{font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:0.35em;color:#8b6aaa;text-transform:uppercase;margin:1rem 0 0.5rem;}
+.game-mystery{font-style:italic;font-size:1.15rem;color:#b8a0cc;max-width:480px;line-height:1.7;margin:0.5rem auto 2.5rem;}
+.hr-ornament{display:flex;align-items:center;gap:1rem;max-width:320px;margin:0 auto 2rem;color:#7a5a9a;font-size:0.8rem;}
+.hr-ornament::before,.hr-ornament::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,#7a5a9a,transparent);}
+#splash .btn{border-color:#9b6fd4;color:#e0c8ff;}
+#splash .btn:hover{background:#9b6fd4;color:#fff;}
+#splash .btn.primary{background:#7a3fa8;border-color:#9b6fd4;color:#f0e0ff;}
+#splash .btn.primary:hover{background:#9b6fd4;}
+#splash .btn.secondary{border-color:#6a4a8a;color:#c0a0e0;}
+#splash .btn.secondary:hover{background:#6a4a8a;color:#fff;}
 .btn-row{display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center;}
-.btn{
-  font-family:'Space Mono',monospace;
-  font-size:0.68rem;
-  letter-spacing:0.18em;
-  text-transform:uppercase;
-  padding:0.85rem 1.8rem;
-  border:1px solid var(--gold);
-  background:transparent;
-  color:var(--gold-light);
-  cursor:pointer;
-  transition:all 0.18s;
-  position:relative;
-  overflow:hidden;
-}
-.btn::after{
-  content:'';position:absolute;inset:0;
-  background:var(--gold);
-  transform:scaleX(0);transform-origin:left;
-  transition:transform 0.18s;
-  z-index:-1;
-}
-.btn:hover::after{transform:scaleX(1);}
-.btn:hover{color:var(--ink);}
+.btn{font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;padding:0.85rem 1.8rem;border:1px solid var(--gold);background:transparent;color:var(--gold-light);cursor:pointer;transition:all 0.18s;position:relative;overflow:hidden;}
+.btn:hover{background:var(--gold);color:var(--ink);}
 .btn.primary{background:var(--gold);color:var(--ink);}
 .btn.primary:hover{background:var(--gold-light);}
 .btn.secondary{border-color:var(--sepia);color:var(--sepia);}
-.btn.secondary::after{background:var(--sepia);}
+.btn.secondary:hover{background:var(--sepia);color:var(--ink);}
 .btn.danger{border-color:var(--crimson);color:#e07080;}
-.btn.danger::after{background:var(--crimson);}
-.btn.danger:hover{color:var(--parchment);}
+.btn.danger:hover{background:var(--crimson);color:var(--parchment);}
+.btn.sm{padding:0.45rem 0.9rem;font-size:0.58rem;}
 .btn:disabled{opacity:0.35;cursor:not-allowed;}
-.btn:disabled::after{display:none;}
 
-/* ── AVATAR SCREEN ── */
-#avatar-screen{
-  min-height:100vh;
-  flex-direction:column;
-  align-items:center;
-  padding:3rem 1.5rem;
-  background:
-    radial-gradient(ellipse 100% 50% at 50% 0%, #111208 0%, transparent 50%),
-    var(--ink);
-}
+/* ── AVATAR ── */
+#avatar-screen{min-height:100vh;flex-direction:column;align-items:center;padding:3rem 1.5rem;
+  background:radial-gradient(ellipse 100% 50% at 50% 0%,#111208 0%,transparent 50%),var(--ink);}
 .screen-header{text-align:center;margin-bottom:2rem;}
-.screen-title{
-  font-family:'Playfair Display',serif;
-  font-size:clamp(1.6rem,5vw,2.5rem);
-  color:var(--gold-light);
-  margin-bottom:0.3rem;
-}
-.screen-sub{
-  font-family:'Space Mono',monospace;
-  font-size:0.6rem;
-  letter-spacing:0.28em;
-  color:var(--sepia);
-  text-transform:uppercase;
-}
-.name-wrap{
-  width:100%;max-width:420px;
-  margin:0 auto 1.8rem;
-}
-.field-label{
-  display:block;
-  font-family:'Space Mono',monospace;
-  font-size:0.6rem;
-  letter-spacing:0.2em;
-  color:var(--sepia);
-  text-transform:uppercase;
-  margin-bottom:0.4rem;
-}
-.field-input{
-  width:100%;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(184,149,106,0.4);
-  color:var(--parchment);
-  font-family:'Crimson Pro',serif;
-  font-size:1.2rem;
-  padding:0.55rem 0.9rem;
-  outline:none;
-  transition:border-color 0.2s;
-}
+.screen-title{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,5vw,2.5rem);color:var(--gold-light);margin-bottom:0.3rem;}
+.screen-sub{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.28em;color:var(--sepia);text-transform:uppercase;}
+.name-wrap{width:100%;max-width:420px;margin:0 auto 1.8rem;}
+.field-label{display:block;font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.2em;color:var(--sepia);text-transform:uppercase;margin-bottom:0.4rem;}
+.field-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(184,149,106,0.4);color:var(--parchment);font-family:'Crimson Pro',serif;font-size:1.2rem;padding:0.55rem 0.9rem;outline:none;transition:border-color 0.2s;}
 .field-input:focus{border-color:var(--gold);}
 .field-input::placeholder{color:var(--fog);}
-.avatar-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-  gap:0.75rem;
-  width:100%;max-width:800px;
-  margin-bottom:2rem;
-}
-.avatar-card{
-  border:1px solid rgba(184,149,106,0.18);
-  background:rgba(255,255,255,0.025);
-  padding:1rem 0.75rem;
-  text-align:center;
-  cursor:pointer;
-  transition:all 0.18s;
-  position:relative;
-}
-.avatar-card:hover:not(.taken){
-  border-color:rgba(184,149,106,0.5);
-  background:rgba(255,255,255,0.06);
-  transform:translateY(-2px);
-}
-.avatar-card.selected{
-  border-color:var(--gold);
-  background:rgba(201,146,42,0.12);
-  box-shadow:0 0 20px rgba(201,146,42,0.15);
-}
+.avatar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.75rem;width:100%;max-width:800px;margin-bottom:2rem;}
+.avatar-card{border:1px solid rgba(184,149,106,0.18);background:rgba(255,255,255,0.025);padding:1rem 0.75rem;text-align:center;cursor:pointer;transition:all 0.18s;position:relative;}
+.avatar-card:hover:not(.taken){border-color:rgba(184,149,106,0.5);background:rgba(255,255,255,0.06);transform:translateY(-2px);}
+.avatar-card.selected{border-color:var(--gold);background:rgba(201,146,42,0.12);box-shadow:0 0 20px rgba(201,146,42,0.15);}
 .avatar-card.taken{opacity:0.28;cursor:not-allowed;}
-.taken-badge{
-  position:absolute;top:5px;right:5px;
-  font-family:'Space Mono',monospace;
-  font-size:0.45rem;letter-spacing:0.1em;
-  color:var(--crimson);
-  border:1px solid var(--crimson);
-  padding:1px 4px;
-  text-transform:uppercase;
-}
+.taken-badge{position:absolute;top:5px;right:5px;font-family:'Space Mono',monospace;font-size:0.45rem;letter-spacing:0.1em;color:var(--crimson);border:1px solid var(--crimson);padding:1px 4px;text-transform:uppercase;}
 .avatar-emoji{font-size:2.2rem;display:block;margin-bottom:0.35rem;}
-.avatar-name{
-  font-family:'Space Mono',monospace;
-  font-size:0.55rem;
-  letter-spacing:0.12em;
-  color:var(--mist);
-  text-transform:uppercase;
-}
+.avatar-name{font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:0.12em;color:var(--mist);text-transform:uppercase;}
 
-/* ── GAME MASTER SETUP ── */
+/* ── GM SCREEN ── */
 #gm-screen{min-height:100vh;padding:2rem 1.5rem;}
 .gm-layout{max-width:900px;margin:0 auto;}
-.gm-section{
-  border:1px solid rgba(184,149,106,0.15);
-  background:rgba(255,255,255,0.02);
-  padding:1.5rem;
-  margin-bottom:1.5rem;
-}
-.gm-section-title{
-  font-family:'Space Mono',monospace;
-  font-size:0.65rem;
-  letter-spacing:0.25em;
-  color:var(--gold);
-  text-transform:uppercase;
-  margin-bottom:1.2rem;
-  padding-bottom:0.75rem;
-  border-bottom:1px solid rgba(184,149,106,0.15);
-}
+.gm-section{border:1px solid rgba(184,149,106,0.15);background:rgba(255,255,255,0.02);padding:1.5rem;margin-bottom:1.5rem;}
+.gm-section-title{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.25em;color:var(--gold);text-transform:uppercase;margin-bottom:1.2rem;padding-bottom:0.75rem;border-bottom:1px solid rgba(184,149,106,0.15);}
 .gm-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
 @media(max-width:600px){.gm-grid{grid-template-columns:1fr;}}
 .gm-field{margin-bottom:1rem;}
-.gm-field label{
-  display:block;
-  font-family:'Space Mono',monospace;
-  font-size:0.58rem;
-  letter-spacing:0.18em;
-  color:var(--sepia);
-  text-transform:uppercase;
-  margin-bottom:0.35rem;
-}
-.gm-field input,.gm-field textarea,.gm-field select{
-  width:100%;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(184,149,106,0.3);
-  color:var(--parchment);
-  font-family:'Crimson Pro',serif;
-  font-size:1rem;
-  padding:0.5rem 0.75rem;
-  outline:none;
-  transition:border-color 0.2s;
-  resize:vertical;
-}
+.gm-field label{display:block;font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.18em;color:var(--sepia);text-transform:uppercase;margin-bottom:0.35rem;}
+.gm-field input,.gm-field textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(184,149,106,0.3);color:var(--parchment);font-family:'Crimson Pro',serif;font-size:1rem;padding:0.5rem 0.75rem;outline:none;transition:border-color 0.2s;resize:vertical;}
 .gm-field input:focus,.gm-field textarea:focus{border-color:var(--gold);}
 .gm-field input::placeholder,.gm-field textarea::placeholder{color:var(--fog);font-style:italic;}
-.location-setup{
-  border:1px solid rgba(184,149,106,0.12);
-  padding:1rem;
-  margin-bottom:0.75rem;
-  background:rgba(0,0,0,0.2);
-}
-.loc-header{
-  display:flex;align-items:center;gap:0.6rem;
-  margin-bottom:0.75rem;
-}
+.location-setup{border:1px solid rgba(184,149,106,0.12);padding:1rem;margin-bottom:0.75rem;background:rgba(0,0,0,0.2);}
+.loc-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;}
 .loc-icon{font-size:1.3rem;}
-.loc-name{
-  font-family:'Playfair Display',serif;
-  font-size:1rem;
-  color:var(--gold-light);
-}
-.suspects-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:0.5rem;
-  margin-top:0.5rem;
-}
-.suspect-tag{
-  font-family:'Space Mono',monospace;
-  font-size:0.58rem;
-  padding:0.4rem 0.6rem;
-  border:1px solid rgba(184,149,106,0.2);
-  color:var(--mist);
-  text-align:center;
-  cursor:pointer;
-  transition:all 0.15s;
-}
+.loc-name{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold-light);}
+.suspects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem;margin-top:0.5rem;}
+.suspect-tag{font-family:'Space Mono',monospace;font-size:0.58rem;padding:0.4rem 0.6rem;border:1px solid rgba(184,149,106,0.2);color:var(--mist);text-align:center;cursor:pointer;transition:all 0.15s;}
 .suspect-tag:hover{border-color:var(--sepia);color:var(--parchment);}
 .suspect-tag.active{border-color:var(--crimson);background:rgba(122,28,46,0.2);color:#e07080;}
+.share-link-box{background:rgba(255,255,255,0.04);border:1px solid rgba(184,149,106,0.25);padding:0.6rem 0.9rem;font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--sepia);word-break:break-all;margin-bottom:1rem;cursor:pointer;transition:border-color 0.2s;}
+.share-link-box:hover{border-color:var(--gold);}
+.success-notice{background:rgba(26,61,43,0.2);border:1px solid rgba(26,61,43,0.4);border-left:3px solid #3a8a5a;padding:0.75rem 1rem;font-size:0.88rem;color:#7acca0;margin-bottom:1rem;}
+.notice{background:rgba(122,28,46,0.15);border:1px solid rgba(122,28,46,0.3);border-left:3px solid var(--crimson);padding:0.75rem 1rem;font-size:0.88rem;color:#e07080;margin-bottom:1rem;}
 
 /* ── BOARD ── */
 #game-board{min-height:100vh;}
-.board-header{
-  background:rgba(0,0,0,0.7);
-  border-bottom:1px solid rgba(184,149,106,0.18);
-  padding:0.65rem 1.25rem;
-  display:flex;align-items:center;justify-content:space-between;
-  gap:1rem;flex-wrap:wrap;
-  position:sticky;top:0;z-index:100;
-  backdrop-filter:blur(8px);
-}
-.board-logo{
-  font-family:'Playfair Display',serif;
-  font-size:1.1rem;
-  color:var(--gold-light);
-  font-style:italic;
-}
+.board-header{background:rgba(0,0,0,0.85);border-bottom:1px solid rgba(184,149,106,0.18);padding:0.65rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;position:sticky;top:0;z-index:400;backdrop-filter:blur(8px);}
+.board-logo{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold-light);font-style:italic;}
 .board-logo span{font-style:normal;color:var(--sepia);font-size:0.8em;}
-.player-pill{
-  display:flex;align-items:center;gap:0.5rem;
-  background:rgba(201,146,42,0.1);
-  border:1px solid rgba(201,146,42,0.3);
-  padding:0.25rem 0.75rem;
-  font-family:'Space Mono',monospace;
-  font-size:0.6rem;
-  color:var(--gold-light);
-}
-.header-actions{display:flex;gap:0.5rem;align-items:center;}
-
-.board-layout{
-  display:grid;
-  grid-template-columns:1fr 280px;
-  min-height:calc(100vh - 52px);
-}
-@media(max-width:700px){
-  .board-layout{grid-template-columns:1fr;}
-  .side-panel{border-left:none;border-top:1px solid rgba(184,149,106,0.15);}
-}
+.player-pill{display:flex;align-items:center;gap:0.5rem;background:rgba(201,146,42,0.1);border:1px solid rgba(201,146,42,0.3);padding:0.25rem 0.75rem;font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--gold-light);}
+.board-layout{display:grid;grid-template-columns:1fr 280px;min-height:calc(100vh - 52px);}
+@media(max-width:700px){.board-layout{grid-template-columns:1fr;}.side-panel{border-left:none;border-top:1px solid rgba(184,149,106,0.15);}}
 
 /* ── MAP ── */
-.map-area{
-  position:relative;
-  background:#080e08;
-  overflow:hidden;
-}
-.map-wrap{
-  position:relative;
-  width:100%;
-  padding-bottom:60%;
-  min-height:320px;
-}
-.map-bg{
-  position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse at 25% 35%,rgba(26,61,43,0.5) 0%,transparent 45%),
-    radial-gradient(ellipse at 75% 65%,rgba(26,61,43,0.35) 0%,transparent 40%),
-    radial-gradient(ellipse at 50% 80%,rgba(20,40,20,0.4) 0%,transparent 40%),
-    #080e08;
-}
-.map-grid-lines{
-  position:absolute;inset:0;
-  background-image:
-    linear-gradient(rgba(80,120,80,0.06) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(80,120,80,0.06) 1px,transparent 1px);
-  background-size:50px 50px;
-}
-.map-label{
-  position:absolute;top:0.75rem;left:50%;
-  transform:translateX(-50%);
-  font-family:'Space Mono',monospace;
-  font-size:0.52rem;
-  letter-spacing:0.35em;
-  color:rgba(184,149,106,0.3);
-  text-transform:uppercase;
-  white-space:nowrap;
-  pointer-events:none;
-}
-.map-compass{
-  position:absolute;bottom:1rem;right:1rem;
-  font-family:'Space Mono',monospace;
-  font-size:0.6rem;
-  color:rgba(184,149,106,0.25);
-  line-height:1.2;
-  text-align:center;
-  pointer-events:none;
-}
+.map-area{position:relative;display:flex;flex-direction:column;}
+#leafletMap{flex:1;min-height:480px;z-index:1;}
 
-/* ── LOCATION PINS ── */
-.loc-pin{
-  position:absolute;
-  transform:translate(-50%,-50%);
-  cursor:pointer;
-  z-index:10;
-}
-.pin-dot{
-  width:48px;height:48px;
+/* Leaflet dark skin */
+.leaflet-container{background:#0d1a0d !important;font-family:'Space Mono',monospace;}
+.leaflet-tile{filter:saturate(0.3) brightness(0.45) sepia(0.4) hue-rotate(60deg);}
+.leaflet-control-attribution{background:rgba(0,0,0,0.7)!important;color:rgba(184,149,106,0.5)!important;font-size:9px!important;}
+.leaflet-control-attribution a{color:rgba(184,149,106,0.7)!important;}
+.leaflet-control-zoom a{background:#1a2a1a!important;color:var(--gold-light)!important;border-color:rgba(184,149,106,0.3)!important;}
+.leaflet-control-zoom a:hover{background:#2a3a2a!important;}
+
+/* Custom marker */
+.hpu-marker{
+  width:52px;height:52px;
   border-radius:50%;
-  border:2px solid rgba(184,149,106,0.35);
-  background:rgba(8,14,8,0.75);
+  border:2px solid rgba(184,149,106,0.5);
+  background:rgba(10,18,10,0.85);
   display:flex;align-items:center;justify-content:center;
-  font-size:1.3rem;
-  transition:all 0.22s;
+  font-size:1.4rem;
+  cursor:pointer;
+  transition:all 0.2s;
   backdrop-filter:blur(6px);
-  position:relative;
+  box-shadow:0 2px 12px rgba(0,0,0,0.6);
 }
-.loc-pin:hover .pin-dot{
-  border-color:var(--gold);
-  background:rgba(201,146,42,0.12);
-  transform:scale(1.1);
-}
-.loc-pin.visited .pin-dot{
-  border-color:var(--gold);
-  background:rgba(201,146,42,0.18);
-  box-shadow:0 0 16px rgba(201,146,42,0.3);
-}
-.loc-pin.my-location .pin-dot{
-  border-color:var(--gold-light);
-  animation:myPulse 2s ease-in-out infinite;
-}
-@keyframes myPulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(232,184,75,0.4);}
-  50%{box-shadow:0 0 0 10px rgba(232,184,75,0);}
-}
-.pin-label{
-  position:absolute;
-  bottom:calc(100% + 6px);left:50%;
-  transform:translateX(-50%);
-  background:rgba(8,14,8,0.92);
-  border:1px solid rgba(184,149,106,0.3);
-  padding:3px 8px;
-  font-family:'Space Mono',monospace;
-  font-size:0.5rem;
-  letter-spacing:0.1em;
-  color:var(--sepia);
-  white-space:nowrap;
-  pointer-events:none;
-}
-.pin-visitors{
-  position:absolute;
-  top:-6px;right:-6px;
-  background:var(--crimson);
-  border-radius:50%;
+.hpu-marker:hover{border-color:var(--gold);transform:scale(1.1);}
+.hpu-marker.visited{border-color:var(--gold);background:rgba(201,146,42,0.18);box-shadow:0 0 16px rgba(201,146,42,0.35);}
+.hpu-marker.my-loc{border-color:var(--gold-light);animation:myPulse 2s ease-in-out infinite;}
+@keyframes myPulse{0%,100%{box-shadow:0 0 0 0 rgba(232,184,75,0.4);}50%{box-shadow:0 0 0 12px rgba(232,184,75,0);}}
+.visitor-badge{
+  position:absolute;top:-4px;right:-4px;
+  background:var(--crimson);border-radius:50%;
   width:18px;height:18px;
   display:flex;align-items:center;justify-content:center;
-  font-family:'Space Mono',monospace;
-  font-size:0.5rem;
-  color:#fff;
-  font-weight:700;
+  font-family:'Space Mono',monospace;font-size:0.5rem;color:#fff;font-weight:700;
 }
+.marker-wrap{position:relative;width:52px;height:52px;}
 
-/* ── PLAYER AVATARS ON MAP ── */
-.map-avatar{
-  position:absolute;
-  transform:translate(-50%,-50%);
-  font-size:1.1rem;
-  transition:all 0.6s cubic-bezier(0.34,1.56,0.64,1);
-  z-index:20;
-  pointer-events:none;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));
-}
+.story-panel{padding:1rem 1.25rem;border-top:1px solid rgba(184,149,106,0.12);background:rgba(0,0,0,0.5);}
+.panel-title{font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.25em;color:var(--gold);text-transform:uppercase;margin-bottom:0.6rem;}
 
 /* ── SIDE PANEL ── */
-.side-panel{
-  border-left:1px solid rgba(184,149,106,0.15);
-  background:rgba(0,0,0,0.3);
-  display:flex;flex-direction:column;
-  overflow-y:auto;
-}
-.panel-section{
-  border-bottom:1px solid rgba(184,149,106,0.1);
-  padding:1rem;
-}
-.panel-title{
-  font-family:'Space Mono',monospace;
-  font-size:0.58rem;
-  letter-spacing:0.25em;
-  color:var(--gold);
-  text-transform:uppercase;
-  margin-bottom:0.75rem;
-}
-
-/* ── CLUE LOG ── */
-.clue-entry{
-  border-left:2px solid var(--gold-dim);
-  padding:0.5rem 0.6rem;
-  margin-bottom:0.5rem;
-  background:rgba(201,146,42,0.04);
-}
-.clue-location{
-  font-family:'Space Mono',monospace;
-  font-size:0.55rem;
-  letter-spacing:0.1em;
-  color:var(--sepia);
-  text-transform:uppercase;
-  margin-bottom:0.2rem;
-}
-.clue-text{
-  font-style:italic;
-  font-size:0.88rem;
-  color:var(--parchment);
-  line-height:1.5;
-}
-.clue-empty{
-  font-style:italic;
-  font-size:0.85rem;
-  color:var(--fog);
-  text-align:center;
-  padding:0.5rem 0;
-}
-
-/* ── PLAYER LIST ── */
-.player-row{
-  display:flex;align-items:center;gap:0.5rem;
-  padding:0.35rem 0;
-  border-bottom:1px solid rgba(184,149,106,0.07);
-}
+.side-panel{border-left:1px solid rgba(184,149,106,0.15);background:rgba(0,0,0,0.4);display:flex;flex-direction:column;overflow-y:auto;max-height:calc(100vh - 52px);}
+.panel-section{border-bottom:1px solid rgba(184,149,106,0.1);padding:0.85rem;}
+.clue-entry{border-left:2px solid var(--gold-dim);padding:0.5rem 0.6rem;margin-bottom:0.5rem;background:rgba(201,146,42,0.04);}
+.clue-location{font-family:'Space Mono',monospace;font-size:0.52rem;letter-spacing:0.1em;color:var(--sepia);text-transform:uppercase;margin-bottom:0.2rem;}
+.clue-text{font-style:italic;font-size:0.88rem;color:var(--parchment);line-height:1.5;}
+.clue-empty{font-style:italic;font-size:0.85rem;color:var(--fog);text-align:center;padding:0.5rem 0;}
+.player-row{display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid rgba(184,149,106,0.07);}
 .player-row:last-child{border-bottom:none;}
-.player-row-avatar{font-size:1.1rem;}
 .player-row-info{flex:1;min-width:0;}
-.player-row-name{
-  font-size:0.85rem;
-  color:var(--parchment);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.player-row-loc{
-  font-family:'Space Mono',monospace;
-  font-size:0.5rem;
-  letter-spacing:0.08em;
-  color:var(--sepia);
-  text-transform:uppercase;
-}
-.player-clue-count{
-  font-family:'Space Mono',monospace;
-  font-size:0.58rem;
-  color:var(--gold);
-  background:rgba(201,146,42,0.12);
-  border:1px solid rgba(201,146,42,0.25);
-  padding:1px 6px;
-  white-space:nowrap;
-}
+.player-row-name{font-size:0.85rem;color:var(--parchment);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.player-row-loc{font-family:'Space Mono',monospace;font-size:0.5rem;letter-spacing:0.08em;color:var(--sepia);text-transform:uppercase;}
+.player-clue-count{font-family:'Space Mono',monospace;font-size:0.55rem;color:var(--gold);background:rgba(201,146,42,0.12);border:1px solid rgba(201,146,42,0.25);padding:1px 5px;white-space:nowrap;}
+.tag{display:inline-block;font-family:'Space Mono',monospace;font-size:0.5rem;letter-spacing:0.08em;padding:2px 6px;border:1px solid rgba(184,149,106,0.22);color:var(--sepia);margin:2px;}
 
-/* ── CODEWORD MODAL ── */
-.modal-overlay{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,0.85);
-  z-index:200;
-  display:none;
-  align-items:center;justify-content:center;
-  padding:1rem;
-  backdrop-filter:blur(4px);
-}
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
-.modal{
-  background:var(--slate);
-  border:1px solid rgba(184,149,106,0.3);
-  padding:2rem;
-  max-width:460px;width:100%;
-  position:relative;
-  box-shadow:0 0 60px rgba(0,0,0,0.8);
-}
-.modal-close{
-  position:absolute;top:1rem;right:1rem;
-  background:none;border:none;
-  color:var(--fog);cursor:pointer;
-  font-size:1.2rem;
-  transition:color 0.15s;
-}
+.modal{background:var(--slate);border:1px solid rgba(184,149,106,0.3);padding:1.75rem;max-width:520px;width:100%;position:relative;box-shadow:0 0 60px rgba(0,0,0,0.9);max-height:90vh;overflow-y:auto;}
+.modal-close{position:absolute;top:0.9rem;right:0.9rem;background:none;border:none;color:var(--fog);cursor:pointer;font-size:1.2rem;transition:color 0.15s;line-height:1;}
 .modal-close:hover{color:var(--parchment);}
-.modal-icon{font-size:2.5rem;text-align:center;display:block;margin-bottom:0.75rem;}
-.modal-title{
-  font-family:'Playfair Display',serif;
-  font-size:1.5rem;
-  color:var(--gold-light);
-  text-align:center;
-  margin-bottom:0.3rem;
-}
-.modal-sub{
-  font-style:italic;
-  color:var(--mist);
-  text-align:center;
-  font-size:0.9rem;
-  margin-bottom:1.5rem;
-}
-.code-input{
-  width:100%;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(184,149,106,0.4);
-  color:var(--parchment);
-  font-family:'Space Mono',monospace;
-  font-size:1.4rem;
-  letter-spacing:0.25em;
-  text-align:center;
-  text-transform:uppercase;
-  padding:0.75rem 1rem;
-  outline:none;
-  transition:border-color 0.2s;
-  margin-bottom:1rem;
-}
+.modal-icon{font-size:2.2rem;text-align:center;display:block;margin-bottom:0.6rem;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold-light);text-align:center;margin-bottom:0.25rem;}
+.modal-sub{font-style:italic;color:var(--mist);text-align:center;font-size:0.9rem;margin-bottom:1.25rem;line-height:1.5;}
+
+/* Location modal tabs */
+.loc-tabs{display:flex;gap:0;margin-bottom:1.25rem;border:1px solid rgba(184,149,106,0.25);}
+.loc-tab{flex:1;padding:0.5rem;font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;text-align:center;cursor:pointer;background:transparent;border:none;color:var(--mist);transition:all 0.15s;}
+.loc-tab.active{background:rgba(201,146,42,0.12);color:var(--gold-light);border-bottom:2px solid var(--gold);}
+.loc-tab:hover:not(.active){color:var(--parchment);background:rgba(255,255,255,0.04);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* Street view embed */
+.streetview-frame{width:100%;height:280px;border:1px solid rgba(184,149,106,0.2);margin-bottom:1rem;background:#0a150a;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0.5rem;}
+.streetview-frame iframe{width:100%;height:100%;border:none;}
+.streetview-placeholder{text-align:center;color:var(--mist);font-style:italic;font-size:0.9rem;}
+
+/* Directions panel */
+.directions-info{background:rgba(201,146,42,0.06);border:1px solid rgba(201,146,42,0.18);padding:1rem;margin-bottom:1rem;}
+.directions-address{font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:0.08em;color:var(--sepia);margin-bottom:0.5rem;}
+.directions-desc{font-style:italic;font-size:0.9rem;color:var(--mist);line-height:1.5;}
+
+/* Codeword tab */
+.code-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(184,149,106,0.4);color:var(--parchment);font-family:'Space Mono',monospace;font-size:1.4rem;letter-spacing:0.25em;text-align:center;text-transform:uppercase;padding:0.75rem 1rem;outline:none;transition:border-color 0.2s;margin-bottom:1rem;}
 .code-input:focus{border-color:var(--gold);}
-.code-error{
-  font-family:'Space Mono',monospace;
-  font-size:0.6rem;
-  letter-spacing:0.1em;
-  color:#e07080;
-  text-align:center;
-  margin-bottom:0.75rem;
-  min-height:1rem;
-}
-
-/* ── CLUE REVEAL ── */
-.clue-reveal{
-  background:rgba(201,146,42,0.08);
-  border:1px solid rgba(201,146,42,0.25);
-  padding:1.25rem;
-  margin-bottom:1rem;
-  display:none;
-}
+.code-error{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;color:#e07080;text-align:center;margin-bottom:0.75rem;min-height:1rem;}
+.clue-reveal{background:rgba(201,146,42,0.08);border:1px solid rgba(201,146,42,0.25);padding:1.25rem;margin-bottom:1rem;display:none;}
 .clue-reveal.show{display:block;}
-.clue-reveal-label{
-  font-family:'Space Mono',monospace;
-  font-size:0.55rem;
-  letter-spacing:0.2em;
-  color:var(--gold);
-  text-transform:uppercase;
-  margin-bottom:0.5rem;
-}
-.clue-reveal-text{
-  font-style:italic;
-  font-size:1.05rem;
-  color:var(--parchment);
-  line-height:1.6;
-}
+.clue-reveal-label{font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:0.2em;color:var(--gold);text-transform:uppercase;margin-bottom:0.5rem;}
+.clue-reveal-text{font-style:italic;font-size:1.05rem;color:var(--parchment);line-height:1.6;}
 
-/* ── ACCUSATION MODAL ── */
-.accuse-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;
-  margin-bottom:1rem;
-}
-.accuse-option{
-  border:1px solid rgba(184,149,106,0.2);
-  background:rgba(255,255,255,0.02);
-  padding:0.5rem 0.6rem;
-  font-family:'Space Mono',monospace;
-  font-size:0.58rem;
-  letter-spacing:0.08em;
-  color:var(--mist);
-  cursor:pointer;
-  transition:all 0.15s;
-  text-align:center;
-}
+/* Accusation */
+.accuse-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.75rem;}
+.accuse-option{border:1px solid rgba(184,149,106,0.2);background:rgba(255,255,255,0.02);padding:0.5rem 0.6rem;font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:0.06em;color:var(--mist);cursor:pointer;transition:all 0.15s;text-align:center;}
 .accuse-option:hover{border-color:var(--sepia);color:var(--parchment);}
 .accuse-option.selected{border-color:var(--crimson);background:rgba(122,28,46,0.2);color:#e07080;}
-.accuse-section-label{
-  font-family:'Space Mono',monospace;
-  font-size:0.58rem;
-  letter-spacing:0.2em;
-  color:var(--sepia);
-  text-transform:uppercase;
-  margin:0.75rem 0 0.4rem;
-}
+.accuse-section-label{font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.2em;color:var(--sepia);text-transform:uppercase;margin:0.75rem 0 0.4rem;}
 
-/* ── WIN SCREEN ── */
-#win-screen.active{
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  min-height:100vh;
-  text-align:center;
-  padding:2rem;
-  background:radial-gradient(ellipse 80% 60% at 50% 40%,#1a0f00 0%,var(--ink) 70%);
-}
+/* Win screen */
+#win-screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem;
+  background:radial-gradient(ellipse 80% 60% at 50% 40%,#1a0f00 0%,var(--ink) 70%);}
 .win-trophy{font-size:4rem;animation:float 3s ease-in-out infinite;}
-@keyframes float{
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-10px);}
-}
-.win-title{
-  font-family:'Playfair Display',serif;
-  font-size:clamp(2rem,7vw,4rem);
-  color:var(--gold-light);
-  margin:1rem 0 0.5rem;
-  text-shadow:0 0 40px rgba(232,184,75,0.3);
-}
-.win-player{
-  font-size:1.3rem;
-  color:var(--sepia);
-  font-style:italic;
-  margin-bottom:1.5rem;
-}
-.win-solution{
-  background:rgba(201,146,42,0.08);
-  border:1px solid rgba(201,146,42,0.25);
-  padding:1.5rem 2rem;
-  max-width:500px;
-  margin-bottom:2rem;
-}
-.win-solution-label{
-  font-family:'Space Mono',monospace;
-  font-size:0.6rem;
-  letter-spacing:0.25em;
-  color:var(--sepia);
-  text-transform:uppercase;
-  margin-bottom:0.75rem;
-}
-.win-solution-item{
-  font-size:1.1rem;
-  color:var(--parchment);
-  margin-bottom:0.3rem;
-}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.win-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,7vw,4rem);color:var(--gold-light);margin:1rem 0 0.5rem;}
+.win-solution{background:rgba(201,146,42,0.08);border:1px solid rgba(201,146,42,0.25);padding:1.5rem 2rem;max-width:480px;margin-bottom:2rem;}
+.win-solution-label{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.25em;color:var(--sepia);text-transform:uppercase;margin-bottom:0.75rem;}
+.win-solution-item{font-size:1.1rem;color:var(--parchment);margin-bottom:0.3rem;}
 .win-solution-item strong{color:var(--gold-light);}
-
-/* ── MISC ── */
-.tag{
-  display:inline-block;
-  font-family:'Space Mono',monospace;
-  font-size:0.52rem;
-  letter-spacing:0.1em;
-  padding:2px 7px;
-  border:1px solid rgba(184,149,106,0.25);
-  color:var(--sepia);
-  margin:2px;
-}
-.notice{
-  background:rgba(122,28,46,0.15);
-  border:1px solid rgba(122,28,46,0.3);
-  border-left:3px solid var(--crimson);
-  padding:0.75rem 1rem;
-  font-size:0.88rem;
-  color:#e07080;
-  margin-bottom:1rem;
-}
-.success-notice{
-  background:rgba(26,61,43,0.2);
-  border:1px solid rgba(26,61,43,0.4);
-  border-left:3px solid #3a8a5a;
-  padding:0.75rem 1rem;
-  font-size:0.88rem;
-  color:#7acca0;
-  margin-bottom:1rem;
-}
-.share-link-box{
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(184,149,106,0.25);
-  padding:0.6rem 0.9rem;
-  font-family:'Space Mono',monospace;
-  font-size:0.65rem;
-  color:var(--sepia);
-  word-break:break-all;
-  margin-bottom:1rem;
-  cursor:pointer;
-  transition:border-color 0.2s;
-}
-.share-link-box:hover{border-color:var(--gold);}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════ SPLASH -->
+<!-- ═══ SPLASH ═══ -->
 <div id="splash" class="screen active">
   <span class="splash-ornament">🕯️</span>
-  <div class="game-title">
-    <em>High Point University</em>
-    Whodunit
-  </div>
+  <div class="game-title"><em>High Point University</em>Whodunit</div>
   <div class="game-tagline">A Campus Mystery · 11 Players</div>
-  <p class="game-mystery">
-    Something has happened on campus. Suspects roam the grounds.<br>
-    Clues hide behind locked doors. Only one detective will crack the case.
-  </p>
+  <p class="game-mystery">Something has happened on campus. Suspects roam the grounds. Clues hide behind locked doors. Only one detective will crack the case.</p>
   <div class="hr-ornament">✦</div>
   <div class="btn-row">
     <button class="btn primary" onclick="showScreen('avatar-screen')">Join the Investigation</button>
@@ -800,7 +233,7 @@ body{
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ AVATAR SELECT -->
+<!-- ═══ AVATAR ═══ -->
 <div id="avatar-screen" class="screen">
   <div class="screen-header">
     <div class="screen-title">Choose Your Detective</div>
@@ -817,130 +250,86 @@ body{
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ GM SETUP -->
+<!-- ═══ GM SCREEN ═══ -->
 <div id="gm-screen" class="screen" style="padding:2rem 1.5rem;">
   <div class="gm-layout">
     <div class="screen-header" style="margin-bottom:1.5rem;">
       <div class="screen-title">🕵️ Game Master Control Room</div>
       <div class="screen-sub">Set the mystery · assign codewords · launch the game</div>
     </div>
-
-    <!-- Mystery Setup -->
     <div class="gm-section">
       <div class="gm-section-title">⚙ Mystery Configuration</div>
       <div class="gm-grid">
         <div class="gm-field">
           <label>Game Title</label>
-          <input type="text" id="gmTitle" placeholder="The Stolen Flame..." value="">
+          <input type="text" id="gmTitle" placeholder="The Stolen Flame...">
         </div>
         <div class="gm-field">
           <label>Opening Story (shown to all players)</label>
-          <textarea id="gmStory" rows="3" placeholder="Set the scene... what happened on campus?"></textarea>
+          <textarea id="gmStory" rows="3" placeholder="Set the scene..."></textarea>
         </div>
       </div>
     </div>
-
-    <!-- Suspects -->
     <div class="gm-section">
-      <div class="gm-section-title">👤 Suspects (pick 6)</div>
+      <div class="gm-section-title">👤 Suspects (pick 6–8)</div>
       <div class="suspects-grid" id="suspectsGrid"></div>
     </div>
-
-    <!-- Weapons -->
     <div class="gm-section">
-      <div class="gm-section-title">🔪 Weapons / Items (pick 6)</div>
+      <div class="gm-section-title">🔪 Weapons / Items (pick 6–8)</div>
       <div class="suspects-grid" id="weaponsGrid"></div>
     </div>
-
-    <!-- Location Codewords & Clues -->
     <div class="gm-section">
       <div class="gm-section-title">📍 Location Codewords & Clues</div>
-      <p style="font-style:italic;color:var(--mist);font-size:0.88rem;margin-bottom:1rem;">
-        Each codeword is printed and posted physically at that campus location. Players must go there, find the card, and enter the code to unlock the clue.
-      </p>
+      <p style="font-style:italic;color:var(--mist);font-size:0.88rem;margin-bottom:1rem;">Print and post each codeword card physically at its campus location. Players walk there, find the card, enter the code.</p>
       <div id="locationSetup"></div>
     </div>
-
-    <!-- Solution -->
     <div class="gm-section">
-      <div class="gm-section-title">🔒 The Real Solution (only you know this)</div>
+      <div class="gm-section-title">🔒 The Real Solution (only you know)</div>
       <div class="gm-grid">
-        <div class="gm-field">
-          <label>The Culprit</label>
-          <input type="text" id="gmSuspect" placeholder="e.g. Professor Harrow">
-        </div>
-        <div class="gm-field">
-          <label>The Location</label>
-          <input type="text" id="gmLocation" placeholder="e.g. Smith Library">
-        </div>
-        <div class="gm-field">
-          <label>The Weapon / Item</label>
-          <input type="text" id="gmWeapon" placeholder="e.g. A torn manuscript">
-        </div>
+        <div class="gm-field"><label>The Culprit</label><input type="text" id="gmSuspect" placeholder="e.g. Prof. Harrow"></div>
+        <div class="gm-field"><label>The Location</label><input type="text" id="gmLocation" placeholder="e.g. Smith Library"></div>
+        <div class="gm-field"><label>The Weapon / Item</label><input type="text" id="gmWeapon" placeholder="e.g. A torn manuscript"></div>
       </div>
     </div>
-
     <div class="btn-row" style="margin-bottom:2rem;">
       <button class="btn secondary" onclick="showScreen('splash')">← Back</button>
       <button class="btn primary" onclick="saveGMConfig()">Save & Generate Game Link →</button>
     </div>
-
     <div id="gmShareSection" style="display:none;">
       <div class="success-notice">✓ Game configured! Share this link with your players:</div>
-      <div class="share-link-box" id="gmShareLink" onclick="copyShareLink()">
-        Click to copy share link...
-      </div>
-      <div style="font-style:italic;font-size:0.85rem;color:var(--mist);margin-bottom:1rem;">
-        Also print and post your codeword cards at each location on campus before the game starts.
-      </div>
+      <div class="share-link-box" id="gmShareLink" onclick="copyShareLink()">Click to copy share link...</div>
+      <div style="font-style:italic;font-size:0.85rem;color:var(--mist);margin-bottom:1rem;">Print and post codeword cards at each campus location before the game starts.</div>
       <button class="btn primary" onclick="printCodeCards()">🖨 Print Codeword Cards</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ GAME BOARD -->
+<!-- ═══ GAME BOARD ═══ -->
 <div id="game-board" class="screen">
   <div class="board-header">
     <div class="board-logo">HPU <span>Whodunit</span></div>
     <div id="playerPill" class="player-pill"></div>
-    <div class="header-actions">
-      <button class="btn danger" onclick="openAccuseModal()" style="padding:0.4rem 0.9rem;font-size:0.6rem;">Make Accusation</button>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="btn sm danger" onclick="openAccuseModal()">Make Accusation</button>
     </div>
   </div>
-
   <div class="board-layout">
-    <!-- MAP -->
     <div class="map-area">
-      <div class="map-wrap" id="mapWrap">
-        <div class="map-bg"></div>
-        <div class="map-grid-lines"></div>
-        <div class="map-label">High Point University · Campus</div>
-        <div class="map-compass">N<br>↑</div>
-        <!-- Pins rendered by JS -->
-        <div id="mapPins"></div>
-        <!-- Player avatars rendered by JS -->
-        <div id="mapAvatars"></div>
-      </div>
-      <!-- Story panel below map -->
-      <div id="storyPanel" style="padding:1rem 1.25rem;border-top:1px solid rgba(184,149,106,0.12);background:rgba(0,0,0,0.3);">
+      <div id="leafletMap"></div>
+      <div class="story-panel">
         <div class="panel-title">📜 The Mystery</div>
         <p id="storyText" style="font-style:italic;font-size:0.95rem;color:var(--mist);line-height:1.7;"></p>
       </div>
     </div>
-
-    <!-- SIDE PANEL -->
     <div class="side-panel">
-      <!-- Active players -->
       <div class="panel-section">
         <div class="panel-title">🔍 Investigators</div>
         <div id="playerList"></div>
       </div>
-      <!-- My clues -->
       <div class="panel-section" style="flex:1;">
         <div class="panel-title">📋 My Clues</div>
         <div id="clueLog"></div>
       </div>
-      <!-- Suspects & Weapons reference -->
       <div class="panel-section">
         <div class="panel-title">👤 Suspects</div>
         <div id="suspectList" style="display:flex;flex-wrap:wrap;gap:3px;"></div>
@@ -953,11 +342,11 @@ body{
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ WIN SCREEN -->
+<!-- ═══ WIN SCREEN ═══ -->
 <div id="win-screen" class="screen">
   <span class="win-trophy">🏆</span>
   <div class="win-title">Case Closed!</div>
-  <p class="win-player" id="winPlayerName"></p>
+  <p style="font-style:italic;font-size:1.2rem;color:var(--sepia);margin-bottom:1.5rem;" id="winPlayerName"></p>
   <div class="win-solution">
     <div class="win-solution-label">The Solution</div>
     <div class="win-solution-item">Culprit: <strong id="winSuspect"></strong></div>
@@ -967,471 +356,486 @@ body{
   <button class="btn secondary" onclick="showScreen('splash')">Play Again</button>
 </div>
 
-<!-- ═══════════════════════════════════════════════ CODEWORD MODAL -->
-<div class="modal-overlay" id="codeModal">
+<!-- ═══ LOCATION MODAL (3 tabs: 3D View · Directions · Codeword) ═══ -->
+<div class="modal-overlay" id="locationModal">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('codeModal')">✕</button>
-    <span class="modal-icon" id="modalIcon">🏛️</span>
-    <div class="modal-title" id="modalTitle">Location Name</div>
-    <p class="modal-sub" id="modalSub">Enter the secret codeword posted at this location</p>
-    <div id="alreadyVisited" class="success-notice" style="display:none;">✓ You have already visited this location and collected the clue.</div>
-    <div id="codeInputArea">
-      <input class="code-input" id="codeInput" type="text" placeholder="· · · · · ·" maxlength="20" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
-      <div class="code-error" id="codeError"></div>
-      <div class="clue-reveal" id="clueReveal">
-        <div class="clue-reveal-label">🕯 Clue Discovered</div>
-        <div class="clue-reveal-text" id="clueRevealText"></div>
+    <button class="modal-close" onclick="closeModal('locationModal')">✕</button>
+    <span class="modal-icon" id="locModalIcon">🏛️</span>
+    <div class="modal-title" id="locModalTitle">Location</div>
+    <p class="modal-sub" id="locModalSub">Investigate this campus location</p>
+
+    <div class="loc-tabs">
+      <button class="loc-tab active" onclick="switchTab('view3d')">🏛 3D View</button>
+      <button class="loc-tab" onclick="switchTab('directions')">🧭 Directions</button>
+      <button class="loc-tab" onclick="switchTab('codeword')">🔐 Codeword</button>
+    </div>
+
+    <!-- TAB: 3D Street View -->
+    <div class="tab-panel active" id="tab-view3d">
+      <div class="streetview-frame" id="streetviewFrame">
+        <div class="streetview-placeholder">
+          <div style="font-size:2rem;margin-bottom:0.5rem;">🌐</div>
+          Loading 3D view...
+        </div>
       </div>
-      <div class="btn-row" style="justify-content:flex-end;">
-        <button class="btn primary" id="submitCodeBtn" onclick="submitCode()">Submit Codeword →</button>
+      <p style="font-style:italic;font-size:0.8rem;color:var(--fog);text-align:center;margin-bottom:0.75rem;">Google Street View of this location · Scroll to explore</p>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn sm secondary" id="openMaps3DBtn" onclick="openMaps3D()">Open in Google Maps 3D →</button>
       </div>
     </div>
+
+    <!-- TAB: Directions -->
+    <div class="tab-panel" id="tab-directions">
+      <div class="directions-info">
+        <div class="directions-address" id="dirAddress"></div>
+        <div class="directions-desc" id="dirDesc"></div>
+      </div>
+      <div class="btn-row" style="flex-direction:column;gap:0.5rem;margin-bottom:1rem;">
+        <button class="btn primary" onclick="getDirections('walk')">🚶 Walking Directions</button>
+        <button class="btn secondary" onclick="getDirections('drive')">🚗 Driving Directions</button>
+      </div>
+      <p style="font-style:italic;font-size:0.8rem;color:var(--fog);text-align:center;">Opens Google Maps with turn-by-turn directions from your current location</p>
+    </div>
+
+    <!-- TAB: Codeword Entry -->
+    <div class="tab-panel" id="tab-codeword">
+      <div id="alreadyVisited" class="success-notice" style="display:none;">✓ You already visited this location and collected the clue.</div>
+      <div id="codeInputArea">
+        <p style="font-style:italic;font-size:0.9rem;color:var(--mist);margin-bottom:1rem;line-height:1.5;">Find the posted codeword card at this campus location and enter it below to unlock your clue.</p>
+        <input class="code-input" id="codeInput" type="text" placeholder="· · · · · ·" maxlength="20" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
+        <div class="code-error" id="codeError"></div>
+        <div class="clue-reveal" id="clueReveal">
+          <div class="clue-reveal-label">🕯 Clue Discovered</div>
+          <div class="clue-reveal-text" id="clueRevealText"></div>
+        </div>
+        <div class="btn-row" style="justify-content:flex-end;">
+          <button class="btn primary" id="submitCodeBtn" onclick="submitCode()">Submit Codeword →</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ ACCUSATION MODAL -->
+<!-- ═══ ACCUSATION MODAL ═══ -->
 <div class="modal-overlay" id="accuseModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('accuseModal')">✕</button>
     <div class="modal-title" style="margin-bottom:0.3rem;">Make Your Accusation</div>
     <p class="modal-sub">Choose carefully. A wrong accusation eliminates you.</p>
     <div id="accuseNotice" class="notice" style="display:none;"></div>
-
     <div class="accuse-section-label">The Culprit</div>
     <div class="accuse-grid" id="accuseSuspects"></div>
-
     <div class="accuse-section-label">The Location</div>
     <div class="accuse-grid" id="accuseLocations"></div>
-
     <div class="accuse-section-label">The Weapon / Item</div>
     <div class="accuse-grid" id="accuseWeapons"></div>
-
     <div style="margin-top:1rem;">
       <button class="btn danger" style="width:100%;" onclick="submitAccusation()">Submit Final Accusation</button>
     </div>
   </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
-//  DATA
+//  LOCATION DATA — real HPU GPS coords + Street View
 // ═══════════════════════════════════════════════════════
+const LOCATIONS = [
+  {
+    id:'slane', name:'Slane Student Center', emoji:'🏛️',
+    lat:35.97185, lng:-79.99615,
+    address:'1 University Pkwy, Slane Student Center, High Point, NC 27268',
+    desc:'Home of Starbucks, the bookstore, Chick-fil-A, Subway, the fitness center, café, and outdoor pool. Central hub of student life.',
+    streetViewParams:'!1m0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus&pb=!1m18!1m12!1m3!1d100!2d-79.99615!3d35.97185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88531e4b6e2b7c9b%3A0x1234567890abcdef!2sSlane+Student+Center!5e0!3m2!1sen!2sus!4v1700000000000'
+  },
+  {
+    id:'smith', name:'Smith Library', emoji:'📚',
+    lat:35.97270, lng:-79.99480,
+    address:'833 Montlieu Ave, Smith Library, High Point, NC 27268',
+    desc:'The academic heart of HPU. Four floors of research materials, study spaces, digital resources, and quiet reading rooms.',
+    streetViewParams:'!1m0!3m2!1sen!2sus!4v1700000000001'
+  },
+  {
+    id:'nido', name:'Nido R. Qubein School of Comm.', emoji:'🎬',
+    lat:35.97360, lng:-79.99370,
+    address:'1 University Pkwy, Nido R. Qubein School, High Point, NC 27268',
+    desc:'State-of-the-art communication facility featuring TV studios, green screen rooms, radio broadcasting, and production labs.',
+    streetViewParams:'!1m0!3m2!1sen!2sus!4v1700000000002'
+  },
+  {
+    id:'hayworth', name:'Hayworth Chapel', emoji:'⛪',
+    lat:35.97075, lng:-79.99540,
+    address:'1 University Pkwy, Hayworth Chapel, High Point, NC 27268',
+    desc:'A serene neo-classical chapel at the heart of campus. Host to ceremonies, quiet reflection, and the university\'s fine arts gallery.',
+    streetViewParams:'!1m0!3m2!1sen!2sus!4v1700000000003'
+  },
+  {
+    id:'cottrell', name:'Cottrell Hall', emoji:'🏫',
+    lat:35.97115, lng:-79.99420,
+    address:'1 University Pkwy, Cottrell Hall, High Point, NC 27268',
+    desc:'Academic building housing classrooms, faculty offices, and seminar rooms. Known for its distinctive architecture along the promenade.',
+    streetViewParams:'!1m0!3m2!1sen!2sus!4v1700000000004'
+  },
+  {
+    id:'congdon', name:'Congdon Hall', emoji:'🔬',
+    lat:35.97215, lng:-79.99695,
+    address:'1 University Pkwy, Congdon Hall, High Point, NC 27268',
+    desc:'Science and research hub featuring modern laboratories, lecture halls, and collaborative research spaces for STEM programs.',
+    streetViewParams:'!1m0!3m2!1sen!2sus!4v1700000000005'
+  },
+];
 
+// Google Maps Street View base — using embed API
+function getStreetViewURL(loc) {
+  return `https://www.google.com/maps/embed/v1/streetview?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFmBWY&location=${loc.lat},${loc.lng}&heading=0&pitch=0&fov=90`;
+}
+function getMapsURL(loc, mode='walking') {
+  return `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}&travelmode=${mode}`;
+}
+function getMaps3DURL(loc) {
+  return `https://www.google.com/maps/@${loc.lat},${loc.lng},18z`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  AVATARS & DEFAULT DATA
+// ═══════════════════════════════════════════════════════
 const AVATARS = [
-  {emoji:'🕵️',name:'The Detective'},
-  {emoji:'👩‍🔬',name:'The Scientist'},
-  {emoji:'🧙',name:'The Scholar'},
-  {emoji:'🎭',name:'The Actor'},
-  {emoji:'🧑‍💻',name:'The Hacker'},
-  {emoji:'🧑‍🎨',name:'The Artist'},
-  {emoji:'🤠',name:'The Ranger'},
-  {emoji:'🦸',name:'The Hero'},
-  {emoji:'🧝',name:'The Elf'},
-  {emoji:'🦊',name:'The Fox'},
+  {emoji:'🕵️',name:'The Detective'},{emoji:'👩‍🔬',name:'The Scientist'},
+  {emoji:'🧙',name:'The Scholar'},{emoji:'🎭',name:'The Actor'},
+  {emoji:'🧑‍💻',name:'The Hacker'},{emoji:'🧑‍🎨',name:'The Artist'},
+  {emoji:'🤠',name:'The Ranger'},{emoji:'🦸',name:'The Hero'},
+  {emoji:'🧝',name:'The Elf'},{emoji:'🦊',name:'The Fox'},
   {emoji:'🦉',name:'The Owl'},
 ];
-
-const LOCATIONS = [
-  {id:'slane',     name:'Slane Student Center', emoji:'🏛️', x:28, y:38},
-  {id:'smith',     name:'Smith Library',         emoji:'📚', x:55, y:28},
-  {id:'nido',      name:'Nido R. Qubein School', emoji:'🎬', x:72, y:42},
-  {id:'hayworth',  name:'Hayworth Chapel',       emoji:'⛪', x:42, y:62},
-  {id:'cottrell',  name:'Cottrell Hall',          emoji:'🏫', x:65, y:68},
-  {id:'congdon',   name:'Congdon Hall',           emoji:'🔬', x:20, y:70},
-];
-
-const DEFAULT_SUSPECTS = [
-  'Prof. Harrow','Dean Whitmore','Coach Sterling',
-  'Dr. Vance','Ms. Langley','Mr. Okafor',
-  'Dean Ashford','Dr. Morrow','Coach Belmont',
-  'Ms. Caldwell','Mr. Trent'
-];
-const DEFAULT_WEAPONS = [
-  'A torn manuscript','A broken trophy','A master key',
-  'A coded letter','A stolen badge','A missing ledger',
-  'An old photograph','A signed contract','A university ring',
-  'A red pen','A missing lanyard'
-];
+const DEFAULT_SUSPECTS=['Prof. Harrow','Dean Whitmore','Coach Sterling','Dr. Vance','Ms. Langley','Mr. Okafor','Dean Ashford','Dr. Morrow','Coach Belmont','Ms. Caldwell','Mr. Trent'];
+const DEFAULT_WEAPONS=['A torn manuscript','A broken trophy','A master key','A coded letter','A stolen badge','A missing ledger','An old photograph','A signed contract','A university ring','A red pen','A missing lanyard'];
 
 // ═══════════════════════════════════════════════════════
-//  STATE — stored in localStorage for persistence
+//  STATE
 // ═══════════════════════════════════════════════════════
-
 let STATE = {
-  // GM config
-  title: 'HPU Whodunit',
-  story: 'Something mysterious has happened on the High Point University campus. Six locations hold secrets. Eleven investigators must gather clues and deduce the truth before the trail goes cold.',
-  suspects: DEFAULT_SUSPECTS.slice(0,6),
-  weapons: DEFAULT_WEAPONS.slice(0,6),
-  solution: {suspect:'',location:'',weapon:''},
-  locationData: {}, // {locId: {codeword, clue}}
-  // Player data
-  players: {}, // {playerId: {name,avatar,location,clues:[],eliminated}}
-  gameStarted: false,
-  winner: null,
+  title:'HPU Whodunit',
+  story:'Something mysterious has happened on the High Point University campus. Six locations hold secrets. Eleven investigators must gather clues and deduce the truth before the trail goes cold.',
+  suspects:DEFAULT_SUSPECTS.slice(0,6),
+  weapons:DEFAULT_WEAPONS.slice(0,6),
+  solution:{suspect:'',location:'',weapon:''},
+  locationData:{},
+  players:{},
+  winner:null,
 };
+let ME=null, selectedAvatar=null, currentModalLoc=null;
+let accuseChoices={suspect:null,location:null,weapon:null};
+let leafletMap=null, mapMarkers={};
 
-let ME = null; // {id, name, avatar}
-let currentModalLocation = null;
-let accuseChoices = {suspect:null,location:null,weapon:null};
-
-function loadState(){
-  try{
-    const saved = localStorage.getItem('hpu_whodunit_state');
-    if(saved) STATE = {...STATE,...JSON.parse(saved)};
-  }catch(e){}
-}
-function saveState(){
-  try{ localStorage.setItem('hpu_whodunit_state',JSON.stringify(STATE)); }catch(e){}
-}
-function loadMe(){
-  try{
-    const saved = localStorage.getItem('hpu_whodunit_me');
-    if(saved) ME = JSON.parse(saved);
-  }catch(e){}
-}
-function saveMe(){
-  try{ localStorage.setItem('hpu_whodunit_me',JSON.stringify(ME)); }catch(e){}
-}
+function loadState(){try{const s=localStorage.getItem('hpu_whodunit_v2');if(s)STATE={...STATE,...JSON.parse(s)};}catch(e){}}
+function saveState(){try{localStorage.setItem('hpu_whodunit_v2',JSON.stringify(STATE));}catch(e){}}
+function loadMe(){try{const s=localStorage.getItem('hpu_me_v2');if(s)ME=JSON.parse(s);}catch(e){}}
+function saveMe(){try{localStorage.setItem('hpu_me_v2',JSON.stringify(ME));}catch(e){}}
 
 // ═══════════════════════════════════════════════════════
 //  SCREENS
 // ═══════════════════════════════════════════════════════
-
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
+  if(id==='game-board') initMap();
+}
+
+// ═══════════════════════════════════════════════════════
+//  MAP (Leaflet + OpenStreetMap)
+// ═══════════════════════════════════════════════════════
+function initMap(){
+  if(leafletMap) { leafletMap.invalidateSize(); renderMapMarkers(); return; }
+  leafletMap = L.map('leafletMap',{
+    center:[35.9718,-79.9960],
+    zoom:17,
+    zoomControl:true,
+    attributionControl:true,
+  });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap contributors',
+    maxZoom:20,
+  }).addTo(leafletMap);
+  renderMapMarkers();
+}
+
+function renderMapMarkers(){
+  // Clear old markers
+  Object.values(mapMarkers).forEach(m=>m.remove());
+  mapMarkers={};
+
+  LOCATIONS.forEach(loc=>{
+    const myPlayer = ME ? STATE.players[ME.id] : null;
+    const visited = myPlayer && myPlayer.clues && myPlayer.clues.some(c=>c.locId===loc.id);
+    const isMyLoc = myPlayer && myPlayer.location===loc.id;
+    const visitors = Object.values(STATE.players).filter(p=>p.location===loc.id);
+
+    const wrapDiv = document.createElement('div');
+    wrapDiv.className='marker-wrap';
+
+    const dot = document.createElement('div');
+    dot.className='hpu-marker' + (visited?' visited':'') + (isMyLoc?' my-loc':'');
+    dot.innerHTML=loc.emoji;
+    wrapDiv.appendChild(dot);
+
+    if(visitors.length>0){
+      const badge=document.createElement('div');
+      badge.className='visitor-badge';
+      badge.textContent=visitors.length;
+      wrapDiv.appendChild(badge);
+    }
+
+    const icon = L.divIcon({html:wrapDiv.outerHTML, className:'', iconSize:[52,52], iconAnchor:[26,26], popupAnchor:[0,-30]});
+    const marker = L.marker([loc.lat,loc.lng],{icon}).addTo(leafletMap);
+    marker.bindTooltip(loc.name,{permanent:false,direction:'top',className:'leaflet-tooltip-dark',offset:[0,-28]});
+    marker.on('click',()=>openLocationModal(loc.id));
+
+    // Also add player avatar markers at this location
+    visitors.forEach((p,i)=>{
+      const a=AVATARS[p.avatar];
+      const offset=0.00003*(i+1);
+      const avatarIcon=L.divIcon({
+        html:`<div style="font-size:1.1rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8));" title="${p.name}">${a.emoji}</div>`,
+        className:'',iconSize:[24,24],iconAnchor:[12,12]
+      });
+      L.marker([loc.lat+offset,loc.lng+offset],{icon:avatarIcon,interactive:false}).addTo(leafletMap);
+    });
+
+    mapMarkers[loc.id]=marker;
+  });
 }
 
 // ═══════════════════════════════════════════════════════
 //  AVATAR SCREEN
 // ═══════════════════════════════════════════════════════
-
-let selectedAvatar = null;
-
 function renderAvatarGrid(){
-  const grid = document.getElementById('avatarGrid');
-  const takenAvatars = Object.values(STATE.players).map(p=>p.avatar);
-  grid.innerHTML = AVATARS.map((a,i)=>{
-    const taken = takenAvatars.includes(i) && (!ME || ME.avatarIndex !== i);
-    return `<div class="avatar-card${taken?' taken':''}${selectedAvatar===i?' selected':''}" onclick="selectAvatar(${i},${taken})">
-      ${taken?'<div class="taken-badge">Taken</div>':''}
+  const grid=document.getElementById('avatarGrid');
+  const taken=Object.values(STATE.players).map(p=>p.avatar);
+  grid.innerHTML=AVATARS.map((a,i)=>{
+    const t=taken.includes(i)&&(!ME||ME.avatarIndex!==i);
+    return `<div class="avatar-card${t?' taken':''}${selectedAvatar===i?' selected':''}" onclick="selectAvatar(${i},${t})">
+      ${t?'<div class="taken-badge">Taken</div>':''}
       <span class="avatar-emoji">${a.emoji}</span>
       <div class="avatar-name">${a.name}</div>
     </div>`;
   }).join('');
 }
-
-function selectAvatar(i, taken){
-  if(taken) return;
-  selectedAvatar = i;
+function selectAvatar(i,taken){
+  if(taken)return;
+  selectedAvatar=i;
   renderAvatarGrid();
   checkJoinReady();
 }
-
 function checkJoinReady(){
-  const name = document.getElementById('playerName').value.trim();
-  document.getElementById('joinBtn').disabled = !(name && selectedAvatar !== null);
+  const n=document.getElementById('playerName').value.trim();
+  document.getElementById('joinBtn').disabled=!(n&&selectedAvatar!==null);
 }
-
-document.addEventListener('DOMContentLoaded',()=>{
-  loadState(); loadMe();
-  document.getElementById('playerName').addEventListener('input', checkJoinReady);
-  if(ME){
-    // Returning player — go straight to board
-    document.getElementById('playerName').value = ME.name;
-    selectedAvatar = ME.avatarIndex;
-    showScreen('game-board');
-    renderBoard();
-  } else {
-    renderAvatarGrid();
-  }
-  initGMScreen();
-});
-
 function joinGame(){
-  const name = document.getElementById('playerName').value.trim();
-  if(!name || selectedAvatar === null) return;
-  const takenAvatars = Object.values(STATE.players).map(p=>p.avatar);
-  if(takenAvatars.includes(selectedAvatar) && (!ME || ME.avatarIndex !== selectedAvatar)){
-    alert('That avatar was just taken! Please pick another.');
-    renderAvatarGrid(); return;
-  }
-  const id = ME ? ME.id : 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-  ME = {id, name, avatarIndex: selectedAvatar};
+  const name=document.getElementById('playerName').value.trim();
+  if(!name||selectedAvatar===null)return;
+  const id=ME?ME.id:'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+  ME={id,name,avatarIndex:selectedAvatar};
   saveMe();
   if(!STATE.players[id]){
-    STATE.players[id] = {name, avatar: selectedAvatar, location: null, clues:[], eliminated: false};
-    saveState();
+    STATE.players[id]={name,avatar:selectedAvatar,location:null,clues:[],eliminated:false};
   } else {
-    STATE.players[id].name = name;
-    STATE.players[id].avatar = selectedAvatar;
-    saveState();
+    STATE.players[id].name=name;
+    STATE.players[id].avatar=selectedAvatar;
   }
+  saveState();
   showScreen('game-board');
   renderBoard();
 }
 
 // ═══════════════════════════════════════════════════════
-//  GAME BOARD
+//  BOARD
 // ═══════════════════════════════════════════════════════
-
 function renderBoard(){
-  // Player pill
   if(ME){
-    const a = AVATARS[ME.avatarIndex];
-    document.getElementById('playerPill').innerHTML = `${a.emoji} <span>${ME.name}</span>`;
+    const a=AVATARS[ME.avatarIndex];
+    document.getElementById('playerPill').innerHTML=`${a.emoji} <span>${ME.name}</span>`;
   }
-  // Story
-  const gameTitle = STATE.title || 'HPU Whodunit';
-  document.getElementById('storyText').textContent = STATE.story || '';
-  // Map pins
-  renderMapPins();
-  // Map avatars
-  renderMapAvatars();
-  // Player list
+  document.getElementById('storyText').textContent=STATE.story||'';
+  renderMapMarkers();
   renderPlayerList();
-  // Clue log
   renderClueLog();
-  // Suspects & weapons
   renderSuspectWeaponLists();
 }
-
-function renderMapPins(){
-  const container = document.getElementById('mapPins');
-  container.innerHTML = LOCATIONS.map(loc=>{
-    const myPlayer = ME ? STATE.players[ME.id] : null;
-    const isMyLoc = myPlayer && myPlayer.location === loc.id;
-    const myClues = myPlayer ? myPlayer.clues : [];
-    const visited = myClues.some(c=>c.locId===loc.id);
-    const visitors = Object.values(STATE.players).filter(p=>p.location===loc.id).length;
-    return `<div class="loc-pin${visited?' visited':''}${isMyLoc?' my-location':''}"
-      style="left:${loc.x}%;top:${loc.y}%;"
-      onclick="openLocationModal('${loc.id}')">
-      <div class="pin-dot">
-        ${loc.emoji}
-        ${visitors>0?`<div class="pin-visitors">${visitors}</div>`:''}
-      </div>
-      <div class="pin-label">${loc.name}</div>
-    </div>`;
-  }).join('');
-}
-
-function renderMapAvatars(){
-  const container = document.getElementById('mapAvatars');
-  container.innerHTML = Object.entries(STATE.players).map(([id,p])=>{
-    if(!p.location) return '';
-    const loc = LOCATIONS.find(l=>l.id===p.location);
-    if(!loc) return '';
-    const a = AVATARS[p.avatar];
-    // Slight random offset so avatars at same location don't fully overlap
-    const offsetX = (parseInt(id.slice(-4),36)%16)-8;
-    const offsetY = (parseInt(id.slice(-5,-1),36)%12)-6;
-    return `<div class="map-avatar" style="left:calc(${loc.x}% + ${offsetX}px);top:calc(${loc.y}% + ${offsetY}px);"
-      title="${p.name}">${a.emoji}</div>`;
-  }).join('');
-}
-
 function renderPlayerList(){
-  const el = document.getElementById('playerList');
-  const players = Object.entries(STATE.players);
-  if(players.length===0){
-    el.innerHTML='<div class="clue-empty">No investigators yet</div>'; return;
-  }
-  el.innerHTML = players.map(([id,p])=>{
-    const a = AVATARS[p.avatar];
-    const loc = p.location ? LOCATIONS.find(l=>l.id===p.location) : null;
-    const isMe = ME && id===ME.id;
+  const el=document.getElementById('playerList');
+  const players=Object.entries(STATE.players);
+  if(!players.length){el.innerHTML='<div class="clue-empty">No investigators yet</div>';return;}
+  el.innerHTML=players.map(([id,p])=>{
+    const a=AVATARS[p.avatar];
+    const loc=p.location?LOCATIONS.find(l=>l.id===p.location):null;
+    const isMe=ME&&id===ME.id;
     return `<div class="player-row${p.eliminated?' opacity-50':''}">
-      <div class="player-row-avatar">${a.emoji}</div>
+      <div style="font-size:1.1rem;">${a.emoji}</div>
       <div class="player-row-info">
         <div class="player-row-name">${p.name}${isMe?' (you)':''}</div>
-        <div class="player-row-loc">${loc?loc.name:'— not yet on campus —'}</div>
+        <div class="player-row-loc">${loc?loc.name:'not yet on campus'}</div>
       </div>
-      <div class="player-clue-count">${p.clues.length} clues</div>
+      <div class="player-clue-count">${p.clues.length}</div>
     </div>`;
   }).join('');
 }
-
 function renderClueLog(){
-  const el = document.getElementById('clueLog');
-  if(!ME || !STATE.players[ME.id]){
-    el.innerHTML='<div class="clue-empty">No clues yet — visit a location</div>'; return;
-  }
-  const clues = STATE.players[ME.id].clues;
-  if(clues.length===0){
-    el.innerHTML='<div class="clue-empty">No clues yet — visit a location</div>'; return;
-  }
-  el.innerHTML = clues.map(c=>{
-    const loc = LOCATIONS.find(l=>l.id===c.locId);
+  const el=document.getElementById('clueLog');
+  if(!ME||!STATE.players[ME.id]){el.innerHTML='<div class="clue-empty">Visit a location to collect clues</div>';return;}
+  const clues=STATE.players[ME.id].clues;
+  if(!clues.length){el.innerHTML='<div class="clue-empty">No clues yet — visit a location</div>';return;}
+  el.innerHTML=clues.map(c=>{
+    const loc=LOCATIONS.find(l=>l.id===c.locId);
     return `<div class="clue-entry">
       <div class="clue-location">${loc?loc.emoji+' '+loc.name:'?'}</div>
       <div class="clue-text">${c.text}</div>
     </div>`;
   }).join('');
 }
-
 function renderSuspectWeaponLists(){
-  document.getElementById('suspectList').innerHTML =
-    STATE.suspects.map(s=>`<span class="tag">${s}</span>`).join('');
-  document.getElementById('weaponList').innerHTML =
-    STATE.weapons.map(w=>`<span class="tag">${w}</span>`).join('');
+  document.getElementById('suspectList').innerHTML=STATE.suspects.map(s=>`<span class="tag">${s}</span>`).join('');
+  document.getElementById('weaponList').innerHTML=STATE.weapons.map(w=>`<span class="tag">${w}</span>`).join('');
 }
 
 // ═══════════════════════════════════════════════════════
-//  LOCATION MODAL — codeword entry
+//  LOCATION MODAL (3 tabs)
 // ═══════════════════════════════════════════════════════
-
+let activeTab='view3d';
 function openLocationModal(locId){
-  currentModalLocation = locId;
-  const loc = LOCATIONS.find(l=>l.id===locId);
-  document.getElementById('modalIcon').textContent = loc.emoji;
-  document.getElementById('modalTitle').textContent = loc.name;
-  document.getElementById('modalSub').textContent = 'Enter the secret codeword posted at this location';
-  document.getElementById('codeInput').value = '';
-  document.getElementById('codeError').textContent = '';
+  currentModalLoc=LOCATIONS.find(l=>l.id===locId);
+  if(!currentModalLoc)return;
+  document.getElementById('locModalIcon').textContent=currentModalLoc.emoji;
+  document.getElementById('locModalTitle').textContent=currentModalLoc.name;
+  document.getElementById('locModalSub').textContent='Investigate this campus location';
+  document.getElementById('dirAddress').textContent=currentModalLoc.address;
+  document.getElementById('dirDesc').textContent=currentModalLoc.desc;
+  // Reset codeword tab
+  document.getElementById('codeInput').value='';
+  document.getElementById('codeError').textContent='';
   document.getElementById('clueReveal').classList.remove('show');
   document.getElementById('clueReveal').style.display='none';
   document.getElementById('submitCodeBtn').style.display='inline-block';
-
-  // Check if already visited
-  const myPlayer = ME ? STATE.players[ME.id] : null;
-  const alreadyVisited = myPlayer && myPlayer.clues.some(c=>c.locId===locId);
-  const alreadyVisitedEl = document.getElementById('alreadyVisited');
-  const codeInputArea = document.getElementById('codeInputArea');
-
-  if(alreadyVisited){
-    alreadyVisitedEl.style.display='block';
-    // Still show the clue
-    const clue = myPlayer.clues.find(c=>c.locId===locId);
+  document.getElementById('codeInput').style.display='block';
+  const myPlayer=ME?STATE.players[ME.id]:null;
+  const visited=myPlayer&&myPlayer.clues&&myPlayer.clues.some(c=>c.locId===locId);
+  document.getElementById('alreadyVisited').style.display=visited?'block':'none';
+  if(visited){
+    const clue=myPlayer.clues.find(c=>c.locId===locId);
     if(clue){
-      document.getElementById('clueRevealText').textContent = clue.text;
+      document.getElementById('clueRevealText').textContent=clue.text;
       document.getElementById('clueReveal').classList.add('show');
       document.getElementById('clueReveal').style.display='block';
     }
     document.getElementById('submitCodeBtn').style.display='none';
     document.getElementById('codeInput').style.display='none';
-    document.getElementById('codeError').style.display='none';
-  } else {
-    alreadyVisitedEl.style.display='none';
-    document.getElementById('codeInput').style.display='block';
-    document.getElementById('codeError').style.display='block';
   }
-
-  openModal('codeModal');
-  if(!alreadyVisited) setTimeout(()=>document.getElementById('codeInput').focus(),100);
+  switchTab('view3d');
+  openModal('locationModal');
+  loadStreetView(currentModalLoc);
 }
 
+function loadStreetView(loc){
+  const frame=document.getElementById('streetviewFrame');
+  // Use Google Maps embed Street View
+  const embedUrl=`https://www.google.com/maps/embed/v1/streetview?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFmBWY&location=${loc.lat},${loc.lng}&heading=210&pitch=10&fov=80`;
+  frame.innerHTML=`<iframe src="${embedUrl}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+}
+
+function openMaps3D(){
+  if(!currentModalLoc)return;
+  window.open(getMaps3DURL(currentModalLoc),'_blank');
+}
+function getDirections(mode){
+  if(!currentModalLoc)return;
+  window.open(getMapsURL(currentModalLoc,mode),'_blank');
+}
+
+function switchTab(tabId){
+  activeTab=tabId;
+  document.querySelectorAll('.loc-tab').forEach((t,i)=>{
+    const ids=['view3d','directions','codeword'];
+    t.classList.toggle('active',ids[i]===tabId);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p=>{
+    p.classList.toggle('active',p.id==='tab-'+tabId);
+  });
+  if(tabId==='codeword'&&!document.getElementById('alreadyVisited').style.display!=='none'){
+    setTimeout(()=>document.getElementById('codeInput').focus(),100);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  CODEWORD SUBMIT
+// ═══════════════════════════════════════════════════════
 function submitCode(){
-  const input = document.getElementById('codeInput').value.trim().toUpperCase();
-  const locData = STATE.locationData[currentModalLocation];
-  const errorEl = document.getElementById('codeError');
-
-  if(!input){ errorEl.textContent='Please enter the codeword.'; return; }
-
-  // Check against configured codeword (or fallback for demo)
-  const expected = locData && locData.codeword
-    ? locData.codeword.toUpperCase()
-    : currentModalLocation.toUpperCase(); // fallback: location id
-
-  if(input !== expected){
-    errorEl.textContent = '✗ Incorrect codeword. Check the posted card and try again.';
+  const input=document.getElementById('codeInput').value.trim().toUpperCase();
+  const locData=STATE.locationData[currentModalLoc.id];
+  const errorEl=document.getElementById('codeError');
+  if(!input){errorEl.textContent='Please enter the codeword.';return;}
+  const expected=locData&&locData.codeword?locData.codeword.toUpperCase():currentModalLoc.id.toUpperCase();
+  if(input!==expected){
+    errorEl.textContent='✗ Incorrect codeword. Check the posted card and try again.';
     document.getElementById('codeInput').style.borderColor='var(--crimson)';
     setTimeout(()=>document.getElementById('codeInput').style.borderColor='',1500);
     return;
   }
-
-  errorEl.textContent = '';
-  const clueText = locData && locData.clue
-    ? locData.clue
-    : 'You searched carefully but the clue here is still being prepared by the Game Master.';
-
-  // Record clue & location
-  if(ME && STATE.players[ME.id]){
-    const player = STATE.players[ME.id];
-    if(!player.clues.some(c=>c.locId===currentModalLocation)){
-      player.clues.push({locId: currentModalLocation, text: clueText});
+  errorEl.textContent='';
+  const clueText=locData&&locData.clue?locData.clue:'The clue for this location has not yet been set by the Game Master.';
+  if(ME&&STATE.players[ME.id]){
+    const player=STATE.players[ME.id];
+    if(!player.clues.some(c=>c.locId===currentModalLoc.id)){
+      player.clues.push({locId:currentModalLoc.id,text:clueText});
     }
-    player.location = currentModalLocation;
+    player.location=currentModalLoc.id;
     saveState();
   }
-
-  // Show reveal
-  document.getElementById('clueRevealText').textContent = clueText;
+  document.getElementById('clueRevealText').textContent=clueText;
   document.getElementById('clueReveal').classList.add('show');
   document.getElementById('clueReveal').style.display='block';
   document.getElementById('submitCodeBtn').style.display='none';
-
-  // Update board
   renderBoard();
 }
 
 // ═══════════════════════════════════════════════════════
-//  ACCUSATION MODAL
+//  ACCUSATION
 // ═══════════════════════════════════════════════════════
-
 function openAccuseModal(){
-  accuseChoices = {suspect:null,location:null,weapon:null};
-  const noticeEl = document.getElementById('accuseNotice');
-  const myPlayer = ME ? STATE.players[ME.id] : null;
-  if(myPlayer && myPlayer.eliminated){
-    noticeEl.style.display='block';
-    noticeEl.textContent='You have been eliminated from making accusations.';
-  } else {
-    noticeEl.style.display='none';
-  }
-
-  // Suspects
-  document.getElementById('accuseSuspects').innerHTML =
-    STATE.suspects.map(s=>`<div class="accuse-option" onclick="pickAccuse('suspect','${s}',this)">${s}</div>`).join('');
-  // Locations
-  document.getElementById('accuseLocations').innerHTML =
-    LOCATIONS.map(l=>`<div class="accuse-option" onclick="pickAccuse('location','${l.name}',this)">${l.emoji} ${l.name}</div>`).join('');
-  // Weapons
-  document.getElementById('accuseWeapons').innerHTML =
-    STATE.weapons.map(w=>`<div class="accuse-option" onclick="pickAccuse('weapon','${w}',this)">${w}</div>`).join('');
-
+  accuseChoices={suspect:null,location:null,weapon:null};
+  const myPlayer=ME?STATE.players[ME.id]:null;
+  const noticeEl=document.getElementById('accuseNotice');
+  noticeEl.style.display=myPlayer&&myPlayer.eliminated?'block':'none';
+  if(myPlayer&&myPlayer.eliminated) noticeEl.textContent='You have been eliminated from making accusations.';
+  document.getElementById('accuseSuspects').innerHTML=STATE.suspects.map(s=>`<div class="accuse-option" onclick="pickAccuse('suspect','${s}',this)">${s}</div>`).join('');
+  document.getElementById('accuseLocations').innerHTML=LOCATIONS.map(l=>`<div class="accuse-option" onclick="pickAccuse('location','${l.name}',this)">${l.emoji} ${l.name}</div>`).join('');
+  document.getElementById('accuseWeapons').innerHTML=STATE.weapons.map(w=>`<div class="accuse-option" onclick="pickAccuse('weapon','${w}',this)">${w}</div>`).join('');
   openModal('accuseModal');
 }
-
-function pickAccuse(type, value, el){
-  const grid = el.closest('.accuse-grid');
-  grid.querySelectorAll('.accuse-option').forEach(o=>o.classList.remove('selected'));
+function pickAccuse(type,value,el){
+  el.closest('.accuse-grid').querySelectorAll('.accuse-option').forEach(o=>o.classList.remove('selected'));
   el.classList.add('selected');
-  accuseChoices[type] = value;
+  accuseChoices[type]=value;
 }
-
 function submitAccusation(){
-  const {suspect,location,weapon} = accuseChoices;
-  if(!suspect||!location||!weapon){
-    alert('Please select a suspect, location, and weapon/item.'); return;
-  }
-  const sol = STATE.solution;
-  const correct =
-    sol.suspect && sol.location && sol.weapon &&
-    suspect.toLowerCase()===sol.suspect.toLowerCase() &&
-    location.toLowerCase()===sol.location.toLowerCase() &&
+  const {suspect,location,weapon}=accuseChoices;
+  if(!suspect||!location||!weapon){alert('Please select a suspect, location, and weapon/item.');return;}
+  const sol=STATE.solution;
+  const correct=sol.suspect&&sol.location&&sol.weapon&&
+    suspect.toLowerCase()===sol.suspect.toLowerCase()&&
+    location.toLowerCase()===sol.location.toLowerCase()&&
     weapon.toLowerCase()===sol.weapon.toLowerCase();
-
   closeModal('accuseModal');
-
   if(correct){
-    // Winner!
-    STATE.winner = ME ? ME.name : 'Anonymous';
-    saveState();
-    document.getElementById('winPlayerName').textContent = (ME?ME.name:'The detective') + ' cracked the case!';
-    document.getElementById('winSuspect').textContent = sol.suspect;
-    document.getElementById('winLocation').textContent = sol.location;
-    document.getElementById('winWeapon').textContent = sol.weapon;
+    STATE.winner=ME?ME.name:'Anonymous'; saveState();
+    document.getElementById('winPlayerName').textContent=(ME?ME.name:'The detective')+' cracked the case!';
+    document.getElementById('winSuspect').textContent=sol.suspect;
+    document.getElementById('winLocation').textContent=sol.location;
+    document.getElementById('winWeapon').textContent=sol.weapon;
     showScreen('win-screen');
   } else {
-    // Wrong — eliminate
-    if(ME && STATE.players[ME.id]){
-      STATE.players[ME.id].eliminated = true;
-      saveState();
-    }
-    alert(`✗ Wrong accusation! You have been eliminated from making further accusations, but you can still move around and share clues with other players.\n\nYour guess: ${suspect} · ${location} · ${weapon}`);
+    if(ME&&STATE.players[ME.id]){STATE.players[ME.id].eliminated=true;saveState();}
+    alert(`✗ Wrong accusation! You are eliminated from making further accusations.\n\nYour guess: ${suspect} · ${location} · ${weapon}`);
     renderBoard();
   }
 }
@@ -1439,152 +843,130 @@ function submitAccusation(){
 // ═══════════════════════════════════════════════════════
 //  GM SCREEN
 // ═══════════════════════════════════════════════════════
-
 function initGMScreen(){
-  // Suspects
-  document.getElementById('suspectsGrid').innerHTML =
-    DEFAULT_SUSPECTS.map(s=>`<div class="suspect-tag${STATE.suspects.includes(s)?' active':''}" onclick="toggleSuspect(this,'${s}')">${s}</div>`).join('');
-  // Weapons
-  document.getElementById('weaponsGrid').innerHTML =
-    DEFAULT_WEAPONS.map(w=>`<div class="suspect-tag${STATE.weapons.includes(w)?' active':''}" onclick="toggleWeapon(this,'${w}')">${w}</div>`).join('');
-  // Locations
-  document.getElementById('locationSetup').innerHTML =
-    LOCATIONS.map(loc=>{
-      const ld = STATE.locationData[loc.id]||{};
-      return `<div class="location-setup">
-        <div class="loc-header">
-          <span class="loc-icon">${loc.emoji}</span>
-          <span class="loc-name">${loc.name}</span>
+  document.getElementById('suspectsGrid').innerHTML=DEFAULT_SUSPECTS.map(s=>`<div class="suspect-tag${STATE.suspects.includes(s)?' active':''}" onclick="toggleSuspect(this,'${s}')">${s}</div>`).join('');
+  document.getElementById('weaponsGrid').innerHTML=DEFAULT_WEAPONS.map(w=>`<div class="suspect-tag${STATE.weapons.includes(w)?' active':''}" onclick="toggleWeapon(this,'${w}')">${w}</div>`).join('');
+  document.getElementById('locationSetup').innerHTML=LOCATIONS.map(loc=>{
+    const ld=STATE.locationData[loc.id]||{};
+    return `<div class="location-setup">
+      <div class="loc-header"><span class="loc-icon">${loc.emoji}</span><span class="loc-name">${loc.name}</span></div>
+      <div class="gm-grid">
+        <div class="gm-field">
+          <label>Codeword (post this at the location)</label>
+          <input type="text" id="cw_${loc.id}" placeholder="e.g. CARDINAL" value="${ld.codeword||''}" style="text-transform:uppercase;font-family:'Space Mono',monospace;letter-spacing:0.15em;">
         </div>
-        <div class="gm-grid">
-          <div class="gm-field">
-            <label>Codeword (post this at the location)</label>
-            <input type="text" id="cw_${loc.id}" placeholder="e.g. CARDINAL" value="${ld.codeword||''}" style="text-transform:uppercase;font-family:'Space Mono',monospace;letter-spacing:0.15em;">
-          </div>
-          <div class="gm-field">
-            <label>Clue (revealed when codeword is entered)</label>
-            <textarea id="clue_${loc.id}" rows="2" placeholder="What clue does this location reveal?">${ld.clue||''}</textarea>
-          </div>
+        <div class="gm-field">
+          <label>Clue (revealed when codeword is entered)</label>
+          <textarea id="clue_${loc.id}" rows="2" placeholder="What clue does this location reveal?">${ld.clue||''}</textarea>
         </div>
-      </div>`;
-    }).join('');
-
-  // Prefill solution fields
-  if(STATE.solution.suspect) document.getElementById('gmSuspect').value = STATE.solution.suspect;
-  if(STATE.solution.location) document.getElementById('gmLocation').value = STATE.solution.location;
-  if(STATE.solution.weapon) document.getElementById('gmWeapon').value = STATE.solution.weapon;
-  if(STATE.title) document.getElementById('gmTitle').value = STATE.title;
-  if(STATE.story) document.getElementById('gmStory').value = STATE.story;
+      </div>
+    </div>`;
+  }).join('');
+  if(STATE.solution.suspect) document.getElementById('gmSuspect').value=STATE.solution.suspect;
+  if(STATE.solution.location) document.getElementById('gmLocation').value=STATE.solution.location;
+  if(STATE.solution.weapon) document.getElementById('gmWeapon').value=STATE.solution.weapon;
+  if(STATE.title) document.getElementById('gmTitle').value=STATE.title;
+  if(STATE.story) document.getElementById('gmStory').value=STATE.story;
 }
-
-function toggleSuspect(el, name){
-  if(el.classList.contains('active')){
-    if(STATE.suspects.length<=2){alert('Need at least 2 suspects.');return;}
-    STATE.suspects = STATE.suspects.filter(s=>s!==name);
-    el.classList.remove('active');
-  } else {
-    if(STATE.suspects.length>=8){alert('Max 8 suspects.');return;}
-    STATE.suspects.push(name);
-    el.classList.add('active');
-  }
+function toggleSuspect(el,name){
+  if(el.classList.contains('active')){if(STATE.suspects.length<=2)return;STATE.suspects=STATE.suspects.filter(s=>s!==name);el.classList.remove('active');}
+  else{if(STATE.suspects.length>=8)return;STATE.suspects.push(name);el.classList.add('active');}
 }
-function toggleWeapon(el, name){
-  if(el.classList.contains('active')){
-    if(STATE.weapons.length<=2){alert('Need at least 2 items.');return;}
-    STATE.weapons = STATE.weapons.filter(w=>w!==name);
-    el.classList.remove('active');
-  } else {
-    if(STATE.weapons.length>=8){alert('Max 8 items.');return;}
-    STATE.weapons.push(name);
-    el.classList.add('active');
-  }
+function toggleWeapon(el,name){
+  if(el.classList.contains('active')){if(STATE.weapons.length<=2)return;STATE.weapons=STATE.weapons.filter(w=>w!==name);el.classList.remove('active');}
+  else{if(STATE.weapons.length>=8)return;STATE.weapons.push(name);el.classList.add('active');}
 }
-
 function saveGMConfig(){
-  STATE.title = document.getElementById('gmTitle').value || 'HPU Whodunit';
-  STATE.story = document.getElementById('gmStory').value || STATE.story;
-  STATE.solution = {
-    suspect: document.getElementById('gmSuspect').value,
-    location: document.getElementById('gmLocation').value,
-    weapon: document.getElementById('gmWeapon').value,
-  };
+  STATE.title=document.getElementById('gmTitle').value||'HPU Whodunit';
+  STATE.story=document.getElementById('gmStory').value||STATE.story;
+  STATE.solution={suspect:document.getElementById('gmSuspect').value,location:document.getElementById('gmLocation').value,weapon:document.getElementById('gmWeapon').value};
   LOCATIONS.forEach(loc=>{
-    STATE.locationData[loc.id] = {
-      codeword: document.getElementById('cw_'+loc.id).value.toUpperCase().trim(),
-      clue: document.getElementById('clue_'+loc.id).value.trim(),
-    };
+    STATE.locationData[loc.id]={codeword:document.getElementById('cw_'+loc.id).value.toUpperCase().trim(),clue:document.getElementById('clue_'+loc.id).value.trim()};
   });
   saveState();
-
-  const shareLink = window.location.href.split('?')[0] + '?game=1';
-  document.getElementById('gmShareLink').textContent = shareLink;
-  document.getElementById('gmShareSection').style.display = 'block';
+  const shareLink=window.location.href.split('?')[0]+'?game=1';
+  document.getElementById('gmShareLink').textContent=shareLink;
+  document.getElementById('gmShareSection').style.display='block';
   document.getElementById('gmShareSection').scrollIntoView({behavior:'smooth'});
 }
-
 function copyShareLink(){
-  const link = document.getElementById('gmShareLink').textContent;
+  const link=document.getElementById('gmShareLink').textContent;
   navigator.clipboard.writeText(link).then(()=>{
-    document.getElementById('gmShareLink').textContent = '✓ Copied to clipboard!';
+    document.getElementById('gmShareLink').textContent='✓ Copied!';
     setTimeout(()=>document.getElementById('gmShareLink').textContent=link,2000);
   });
 }
-
 function printCodeCards(){
-  const win = window.open('','_blank');
-  win.document.write(`<html><head><title>HPU Whodunit — Codeword Cards</title>
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>HPU Whodunit — Codeword Cards</title>
   <style>
-    body{font-family:'Georgia',serif;background:#faf7f0;color:#0c0b09;padding:2rem;}
-    h1{font-size:1.5rem;margin-bottom:0.5rem;}
-    .subtitle{color:#888;font-size:0.9rem;margin-bottom:2rem;}
+    body{font-family:Georgia,serif;background:#faf7f0;color:#0c0b09;padding:2rem;}
+    h1{font-size:1.4rem;margin-bottom:0.3rem;}
+    .sub{color:#888;font-size:0.85rem;margin-bottom:2rem;}
     .cards{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
-    .card{border:2px solid #c9922a;padding:1.5rem;text-align:center;page-break-inside:avoid;}
+    .card{border:2px solid #c9922a;padding:1.5rem;text-align:center;page-break-inside:avoid;background:#fffdf7;}
     .card-icon{font-size:3rem;margin-bottom:0.5rem;}
-    .card-loc{font-size:1.2rem;font-weight:bold;margin-bottom:0.75rem;color:#8b3a1a;}
-    .card-instruction{font-size:0.8rem;color:#666;margin-bottom:1rem;font-style:italic;}
+    .card-loc{font-size:1.1rem;font-weight:bold;margin-bottom:0.25rem;color:#8b3a1a;}
+    .card-addr{font-size:0.75rem;color:#888;margin-bottom:0.75rem;}
+    .card-instr{font-size:0.78rem;color:#666;margin-bottom:0.75rem;font-style:italic;}
     .card-code{font-family:monospace;font-size:2rem;font-weight:bold;letter-spacing:0.3em;color:#0c0b09;border:1px dashed #c9922a;padding:0.5rem 1rem;display:inline-block;margin-bottom:0.75rem;}
-    .card-warning{font-size:0.7rem;color:#999;}
-    @media print{body{padding:0;} .card{margin-bottom:1rem;}}
+    .card-warn{font-size:0.65rem;color:#aaa;}
+    @media print{.sub{margin-bottom:1rem;} .card{margin-bottom:0.5rem;}}
   </style></head><body>
   <h1>🕯️ HPU Whodunit — ${STATE.title||'Campus Mystery'}</h1>
-  <div class="subtitle">Post each card at its campus location before the game starts. Keep these secret until game day!</div>
+  <div class="sub">Post each card at its campus location before the game starts. Keep secret until game day!</div>
   <div class="cards">`);
   LOCATIONS.forEach(loc=>{
-    const ld = STATE.locationData[loc.id]||{};
-    const code = ld.codeword || loc.id.toUpperCase();
+    const ld=STATE.locationData[loc.id]||{};
+    const code=ld.codeword||loc.id.toUpperCase();
     win.document.write(`<div class="card">
       <div class="card-icon">${loc.emoji}</div>
       <div class="card-loc">${loc.name}</div>
-      <div class="card-instruction">You are here! Enter this codeword in the HPU Whodunit app:</div>
+      <div class="card-addr">${loc.address}</div>
+      <div class="card-instr">You found it! Enter this codeword in the HPU Whodunit app:</div>
       <div class="card-code">${code}</div>
-      <div class="card-warning">Do not photograph or share this card with other players.</div>
+      <div class="card-warn">Do not photograph or share this card with other players.</div>
     </div>`);
   });
-  win.document.write(`</div><script>window.onload=()=>window.print();<\/script></body></html>`);
+  win.document.write(`</div><script>window.onload=()=>setTimeout(()=>window.print(),500);<\/script></body></html>`);
   win.document.close();
 }
 
 // ═══════════════════════════════════════════════════════
-//  MODAL HELPERS
+//  MODALS
 // ═══════════════════════════════════════════════════════
-
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){
   document.getElementById(id).classList.remove('open');
-  currentModalLocation = null;
+  if(id==='locationModal'){
+    // Clear iframe to stop video
+    document.getElementById('streetviewFrame').innerHTML='';
+    currentModalLoc=null;
+  }
 }
-// Close on overlay click
 document.querySelectorAll('.modal-overlay').forEach(el=>{
   el.addEventListener('click',e=>{if(e.target===el)closeModal(el.id);});
 });
-// Enter key on code input
 document.addEventListener('keydown',e=>{
-  if(e.key==='Enter' && document.getElementById('codeModal').classList.contains('open')){
-    submitCode();
+  if(e.key==='Enter'&&document.getElementById('locationModal').classList.contains('open')&&activeTab==='codeword') submitCode();
+  if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id));
+});
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  loadState(); loadMe();
+  document.getElementById('playerName').addEventListener('input',checkJoinReady);
+  if(ME){
+    document.getElementById('playerName').value=ME.name;
+    selectedAvatar=ME.avatarIndex;
+    showScreen('game-board');
+    renderBoard();
+  } else {
+    renderAvatarGrid();
   }
-  if(e.key==='Escape'){
-    document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id));
-  }
+  initGMScreen();
 });
 </script>
 </body>
